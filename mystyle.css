@@ -1,0 +1,243 @@
+﻿<style>
+        #outerdiv  
+        { 
+            width: 27%;
+            height: 130px;
+            margin: auto;
+            padding: 5px;
+            border: 1px solid gray;
+            text-align: center;
+            
+        }
+        
+        
+        
+        #outertable
+        {
+            text-align: 'left';
+            border: 0px;
+            width: 25%;
+            position: absolute;
+            left: 500px;
+            top: 100px;
+            
+            
+        }
+        
+        table 
+        {
+            border-collapse: collapse;
+        }
+        
+        img
+        {
+            position: absolute;
+            left: 570px;
+            top: 255px;
+            
+        }
+        
+            
+        
+        #fullNameLabel
+        {
+            position: absolute;
+            left: 480px;
+            top: 560px;
+            
+        }
+        
+        #fullName
+        {
+            position: absolute;
+            left: 710px;
+            top: 560px;
+            
+        }
+        
+        #termEndsLabel
+        {
+            position: absolute;
+            left: 480px;
+            top: 580px;
+            
+        }
+        
+        #termEnds
+        {
+            position: absolute;
+            left: 710px;
+            top: 580px;
+            
+        }
+        
+        
+        #websiteLabel
+        {
+            position: absolute;
+            left: 480px;
+            top: 600px;
+            
+        }
+        
+        #website
+        {
+            position: absolute;
+            left: 710px;
+            top: 600px;
+            
+        }
+        
+        #officeLabel
+        {
+            position: absolute;
+            left: 480px;
+            top: 620px;
+            
+        }
+        
+        #office
+        {
+            position: absolute;
+            left: 710px;
+            top: 620px;
+            
+        }
+        
+        #facebookLabel
+        {
+            position: absolute;
+            left: 480px;
+            top: 640px;
+            
+        }
+        
+        #fbUrl
+        {
+            position: absolute;
+            left: 710px;
+            top: 640px;
+            
+        }
+        
+        #twitter
+        {
+            position: absolute;
+            left: 480px;
+            top: 660px;
+            
+        }
+        
+        #twitterUrl
+        {
+            position: absolute;
+            left: 710px;
+            top: 660px;
+            
+        }   
+        
+        
+        
+        #billIdLabel
+        {
+            position: absolute;
+            left: 420px;
+            top: 330px;
+            
+        }
+        
+        #billId
+        {
+            position: absolute;
+            left: 720px;
+            top: 330px;
+            
+        }
+        
+        #billTitleLabel
+        {
+            position: absolute;
+            left: 420px;
+            top: 350px;
+            
+        }
+        
+        #billTitle
+        {
+            position: absolute;
+            left: 720px;
+            top: 350px;
+            
+        }
+        
+        
+        #sponsorLabel
+        {
+            position: absolute;
+            left: 420px;
+            top: 370px;
+            
+        }
+        
+        #sponsor
+        {
+            position: absolute;
+            left: 720px;
+            top: 370px;
+            
+        }
+        
+        #introducedOnLabel
+        {
+            position: absolute;
+            left: 420px;
+            top: 390px;
+            
+        }
+        
+        #introducedOn
+        {
+            position: absolute;
+            left: 720px;
+            top: 390px;
+            
+        }
+        
+        #lastActionLabel
+        {
+            position: absolute;
+            left: 420px;
+            top: 410px;
+            
+        }
+        
+        #lastAction
+        {
+            position: absolute;
+            left: 720px;
+            top: 410px;
+            
+        }
+        
+        #billUrlLabel
+        {
+            position: absolute;
+            left: 420px;
+            top: 430px;
+            
+        }
+        
+        #billUrl
+        {
+            position: absolute;
+            left: 720px;
+            top: 430px;
+            
+        }
+        
+        
+        tr
+        {
+            text-align: center;
+           
+        }

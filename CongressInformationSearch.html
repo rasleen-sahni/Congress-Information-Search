@@ -1,0 +1,693 @@
+﻿<!DOCTYPE html>
+<html>
+
+<!-- The Header part with title, script and style -->
+<head>
+    <title>Congress Information Search</title>
+    <link rel="stylesheet" type="text/css" href="mystyle.css">
+    <script src="myscript.js"></script>
+</head>
+
+
+<!-- The body begins here-->
+<body>
+<h1 align="center">Congress Informational Search</h1>
+    <div id='outerdiv'>
+
+    <!-- The beginning of the form-->
+    <form id="congressForm" name="congressForm" method="POST">
+    <table id='outertable'>
+    <tr>
+	    <td>
+	    	<label>Congress Database</label>
+	    </td>
+	    <!-- Congress database select option [Legislators, Bills, Committees, Amendments] -->
+	    <td>
+		    <select id="select" name="select" onchange="mySelect()">
+		            <option <?php if(!isset($_POST["select"]) || $_POST["select"] == "Select your option") echo "selected"; else echo ""?> value="Select your option">Select your option</option>
+		            <option <?php if(isset($_POST["select"]) && $_POST["select"] == "Legislators") echo "selected"; else echo ""?> value="Legislators">Legislators</option>
+		            <option <?php if(isset($_POST["select"]) && $_POST["select"] == "Committees") echo "selected"; else echo ""?> value="Committees">Committees</option>
+		            <option <?php if(isset($_POST["select"]) && $_POST["select"] == "Bills") echo "selected"; else echo ""?> value="Bills">Bills</option>
+		            <option <?php if(isset($_POST["select"]) && $_POST["select"] == "Amendments") echo "selected"; else echo ""?> value="Amendments">Amendments</option>
+		    </select>
+	    </td>
+    </tr>
+
+
+   <tr>
+	<!-- Chamber radio buttons - Senate or House -->
+    <td>
+	    <label>Chamber</label>
+    </td>
+	<td>
+	    <input type="radio" name="radio1" <?php if(!isset($_POST["radio1"]) || $_POST["radio1"]=="Senate") echo "checked";else echo "unchecked"?> value="Senate">Senate
+	    <input type="radio" name="radio1" value="House"<?php if(isset($_POST["radio1"]) && $_POST["radio1"]=="House") echo "checked"; else echo "unchecked"?>>House
+	</td>
+    </tr>
+
+
+    <tr>
+    <!-- Placeholdurler for the keyword -->
+	    <td>
+		    <label for="textbox" id="keyword" name="keyword"><?php if(isset($_POST["keyword1"])) echo $_POST["keyword1"]; else echo "Keyword*";?></label>
+		</td>
+		<td>
+		    <input id='textbox' type="text" name="textbox" size="14" value="<?php echo isset($_POST["textbox"]) ?
+		    $_POST["textbox"] : "" ?>"/>
+	    </td>
+    </tr>
+
+
+    <tr>
+    <!-- Submit and Clear Buttons-->
+        <td></td>
+        <td>
+		    <input type="submit" name="search" value="Search">
+		    <input type="button" name="clear" onclick="clearForm(this.form)" value="Clear">
+        </td>
+    </tr>
+    
+
+    <tr>
+    <!-- Link to the sunlight foundation website-->
+    	<td colspan="4">
+    		<a href="http://sunlightfoundation.com/">Powered By Sunlight Foundation</a>
+       </td>
+    </tr>
+    </table>
+        
+    <!-- Hidden input fields, These are shown upon selection of Legislators or Bills or Amendments options in the select value -->
+    <input type="hidden" name="legislators" id="legislators">
+    <input type="hidden" name="bioid" id="bioid">
+    <input type="hidden" name="chamber" id="chamber">
+    <input type="hidden" name="state" id="state">
+    <input type="hidden" name="bills" id="bills">
+    <input type="hidden" name="billIdLabel" id="billIdLabel">
+    <input type="hidden" name="billchamber" id="billchamber">
+    <input type="hidden" name="legorbill" id="legorbill">
+    <input type="hidden" name="keyword1" id="keyword1" value="<?php if(isset($_POST["keyword1"])) echo $_POST["keyword1"]; else echo "";?>">
+    </form>
+    </div>
+    
+
+
+    
+  <!-- PHP code starts from the php tag -->  
+ <!-- States Array-->   
+<?php
+    
+$states = array(
+'alabama'=>'AL',
+'alaska'=>'AK',
+'arizona'=>'AZ',
+'arkansas'=>'AR',
+'california'=>'CA',
+'colorado'=>'CO',
+'connecticut'=>'CT',
+'delaware'=>'DE',
+'florida'=>'FL',
+'georgia'=>'GA',
+'hawaii'=>'HI',
+'idaho'=>'ID',
+'illinois'=>'IL',
+'indiana'=>'IN',
+'iowa'=>'IA',
+'kansas'=>'KS',
+'kentucky'=>'KY',
+'louisiana'=>'LA',
+'maine'=>'ME',
+'maryland'=>'MD',
+'massachusetts'=>'MA',
+'michigan'=>'MI',
+'minnesota'=>'MN',
+'mississippi'=>'MS',
+'missouri'=>'MO',
+'montana'=>'MT',
+'nebraska'=>'NE',
+'nevada'=>'NV',
+'new hampshire'=>'NH',
+'new jersey'=>'NJ',
+'new mexico'=>'NM',
+'new york'=>'NY',
+'north carolina'=>'NC',
+'north dakota'=>'ND',
+'ohio'=>'OH',
+'oklahoma'=>'OK',
+'oregon'=>'OR',
+'pennsylvania'=>'PA',
+'rhode island'=>'RI',
+'south carolina'=>'SC',
+'south dakota'=>'SD',
+'tennessee'=>'TN',
+'texas'=>'Tx',
+'utah'=>'UT',
+'vermont'=>'VT',
+'virginia'=>'VA',
+'washington'=>'WA',
+'west virginia'=>'WV',
+'wisconsin'=>'WI',
+'wyoming'=>'WY'
+);
+    
+    
+<!-- When search button is clicked, the method type is POST and isset() checks if button is clicked or not-->    
+if(isset($_POST["search"]))
+{
+       <!-- When nothing is selected, Default select option is present -->
+        $error="Please enter the following missing information: ";
+    
+        if(empty($_POST["textbox"]) && $_POST["select"] == "Select your option")
+        {
+            
+            $error = $error . "Congress database, keyword";
+            echo '<script type="text/javascript">alert("' . $error . '")</script>';
+            
+        }
+    
+        else if(empty($_POST["textbox"]) || $_POST["select"] == "Select your option")
+        {
+            if($_POST["select"] == "Select your option")
+            {
+                    $error = $error . "Congress database"; 
+            }
+            else if(empty($_POST["textbox"]))
+            {
+                    $error = $error . "keyword"; 
+            }
+            echo '<script type="text/javascript">alert("' . $error . '")</script>';
+        }
+        
+        else
+        {
+
+        <!-- When Legislator is selected-->
+            if($_POST['select'] == "Legislators")
+            {
+                
+                
+                $legislatures = $_POST['select'];
+                $legislatures = strtolower($legislatures);
+                $stateOrRepresentative = $_POST['textbox'];
+                $stateOrRepresentative = trim($stateOrRepresentative," ");
+                if($stateOrRepresentative == null)
+                {
+                    echo "<script type='text/javascript'>alert('Please enter the keyword!')</script>";
+                }
+                else
+                {
+                    
+                $stateOrRepresentative = strtolower($stateOrRepresentative);
+                $chamber = $_POST['radio1'];
+                $chamber = strtolower($chamber);
+                
+                
+                $url = "http://congress.api.sunlightfoundation.com/".$legislatures."?chamber=".$chamber;
+                $oldurl = $url;
+                foreach($states as $name => $abbr)
+                {
+                    if($name == $stateOrRepresentative)
+                    {       
+                            $stateOrRepresentative = strtoupper($abbr);
+                            $url = $url."&state=".$stateOrRepresentative."&apikey=ef7ff68lastActionLabel49billTitle67e93f8billId3a131bdfc9";
+                
+                    }
+                }
+                
+                if($oldurl == $url)
+                {
+                    if (strpos($stateOrRepresentative, ' ') > 0)   
+                    {
+                        $query = explode(" ", $stateOrRepresentative);
+                        $fname = $url."&query=".$query[0]."&apikey=ef7ff68lastActionLabel49billTitle67e93f8billId3a131bdfc9";
+                        $lname = $url."&query=".$query[1]."&apikey=ef7ff68lastActionLabel49billTitle67e93f8billId3a131bdfc9";
+                        $json_fname = file_get_contents($fname);
+                        $rfname = json_decode($json_fname,true);
+                        $json_lname = file_get_contents($lname);
+                        $rlname = json_decode($json_lname,true);
+                        
+                        <!-- Display a heading when no json results are returned from the url-->
+                        if(count($rfname["results"])==0)
+                        {
+                            echo "<br/><h2 align='center'>The API returned zero results for the request.</h2>";
+                        }
+                        
+                        else
+                        {                            
+                            foreach($rfname["results"] as $firstname)
+                            {
+                                foreach($rlname["results"] as $lastname)
+                                {
+                                    if($firstname["first_name"] == $lastname["first_name"] && $firstname["last_name"] == $lastname["last_name"])
+                                    {
+                                        echo "<br/><br/><br/><br/><br/><br/>";
+                                        echo "<table align='center' border='1' width='680'>";
+                                        echo "<tr>";
+                                        echo "<th>Name</th>";
+                                        echo "<th>State</th>";
+                                        echo "<th>Chamber</th>"; 
+                                        echo "<th><b>Details</th>";
+                                        echo "</tr>";
+                                        echo "<tr>";
+                                        echo "<td style='text-align: left; padding-left:80px;'>".$firstname["first_name"]." ".$firstname["last_name"]."</td>";
+                                        echo "<td>".$firstname["state_name"]."</td>"; 
+                                        echo "<td>".$firstname["chamber"]."</td>";
+                                        $bioId = $firstname["bioguide_id"];
+                                        $stateOrRepresentative = $firstname["state_name"];
+                                        $stateOrRepresentative = strtolower($stateOrRepresentative);
+                                        foreach($states as $name => $abbr)
+                                        {
+                                            if($name == $stateOrRepresentative || $stateOrRepresentative == strtolower($abbr))
+                                                {       
+                                                        $stateOrRepresentative = strtoupper($abbr);
+
+                                                }
+                                        }
+                                        echo '<td><a href="#" onclick="viewDetails(\''.$bioId.'\',\''.$chamber.'\',\''.$stateOrRepresentative.'\')">View Details</a></td>';
+                                        echo "</tr>";
+                                        echo "</table>";
+                                    }
+                                }
+                            }      
+                        }   
+                        
+                    }
+                    else
+                    {
+                        $url = $url."&query=".$stateOrRepresentative."&apikey=ef7ff68lastActionLabel49billTitle67e93f8billId3a131bdfc9";
+                        $json = file_get_contents($url);
+                        $result = json_decode($json,true);
+                        if(count($result["results"])==0)
+                        {
+                            echo "<br/><h2 align='center'>The API returned zero results for the request.</h2>";
+                        }   
+                        else
+                        {
+                                echo "<br/><br/><br/><br/><br/><br/>";
+                                echo "<table align='center' border='1' width='680'>";
+                                echo "<tr>";
+                                echo "<th>Name</th>";
+                                echo "<th>State</th>";
+                                echo "<th>Chamber</th>"; 
+                                echo "<th><b>Details</th>";
+                                echo "</tr>";
+    
+    
+                                foreach($result["results"] as $r)
+                                {
+                    
+                                    echo "<tr>";
+                                    echo "<td style='text-align: left; padding-left:80px;'>".$r["first_name"]." ".$r["last_name"]."</td>";
+                                    echo "<td>".$r["state_name"]."</td>"; 
+                                    echo "<td>".$r["chamber"]."</td>";
+                                    $bioId = $r["bioguide_id"];
+                                    $stateOrRepresentative = $r["state_name"];
+                                    $stateOrRepresentative = strtolower($stateOrRepresentative);
+                                        foreach($states as $name => $abbr)
+                                        {
+                                            if($name == $stateOrRepresentative || $stateOrRepresentative == strtolower($abbr))
+                                                {       
+                                                        $stateOrRepresentative = strtoupper($abbr);
+
+                                                }
+                                        }
+                                    echo '<td><a href="#" onclick="viewDetails(\''.$bioId.'\',\''.$chamber.'\',\''.$stateOrRepresentative.'\')">View Details</a></td>';
+                                    echo "</tr>";
+                                } 
+                                echo "</table>";   
+                        }
+        
+                    }  
+                }
+ 
+                else 
+                {
+                    
+                    $json = file_get_contents($url);
+                    $result = json_decode($json,true);
+                    if(count($result["results"])==0)
+                    {
+                        echo "<br/><h2 align='center'>The API returned zero results for the request.</h2>";
+                    }
+                    else
+                    {
+                    
+                		<!-- Displaying results in tabular form-->
+                        echo "<br/><br/><br/><br/><br/><br/>";
+                        echo "<table align='center' border='1' width='680'>";
+                        echo "<tr>";
+                        echo "<th>Name</th>";
+                        echo "<th>State</th>";
+                        echo "<th>Chamber</th>"; 
+                        echo "<th><b>Details</th>";
+                        echo "</tr>";
+    
+                        foreach($result["results"] as $r)
+                        {
+                    
+                            echo "<tr>";
+                            echo "<td style='text-align: left; padding-left:80px;'>".$r["first_name"]." ".$r["last_name"]."</td>";
+                            echo "<td>".$r["state_name"]."</td>"; 
+                            echo "<td>".$r["chamber"]."</td>";
+                            $bioId = $r["bioguide_id"];
+                            $stateOrRepresentative = $r["state_name"];
+                            $stateOrRepresentative = strtolower($stateOrRepresentative);
+                            foreach($states as $name => $abbr)
+                            {
+                                if($name == $stateOrRepresentative || $stateOrRepresentative == strtolower($abbr))
+                                {       
+                                            $stateOrRepresentative = strtoupper($abbr);
+
+                                }
+                            }
+                            echo '<td><a href="#" onclick="viewDetails(\''.$bioId.'\',\''.$chamber.'\',\''.$stateOrRepresentative.'\')">View Details</a></td>';
+                            echo "</tr>";
+                        } 
+                        echo "</table>";
+                    }
+       
+                    }
+                }
+                
+            }
+            
+            <!-- When Committees is selected-->
+            else if($_POST['select'] == "Committees")
+            {
+                
+                
+                $committee = $_POST['select'];
+                $committee = strtolower($committee);
+                $committeeId = $_POST['textbox'];
+                $committeeId = trim($committeeId," ");
+                if($committeeId == null)
+                {
+                    echo "<script type='text/javascript'>alert('Please enter the keyword!')</script>";
+                }
+                else
+                {
+	                $committeeId = strtoupper($committeeId);                
+	                $chamber = $_POST['radio1'];
+	                $chamber = strtolower($chamber);
+	                
+	                $url = "http://congress.api.sunlightfoundation.com/".$committee."?committee_id=".$committeeId."&chamber=".$chamber."&apikey=ef7ff68lastActionLabel49billTitle67e93f8billId3a131bdfc9";
+	                
+	                
+	                
+	                $json = file_get_contents($url);
+	                $result = json_decode($json,true);
+	                if(count($result["results"])==0)
+	                {
+	                     echo "<br/><h2 align='center'>The API returned zero results for the request.</h2>";
+	                }
+	                else
+	                {
+	                    
+	                
+	                echo "<br/><br/><br/><br/><br/><br/>";
+	                echo "<table align='center' border='1' width='720'>";
+	                echo "<tr>";
+	                echo "<th>Committee ID</th>";
+	                echo "<th>Committee Name</th>";
+	                echo "<th>Chamber</th>"; 
+	                echo "</tr>";
+	    
+	    
+	                foreach($result["results"] as $r)
+	                {
+	                    
+	                    echo "<tr>";
+	                    echo "<td>".$r["committee_id"]."</td>";
+	                    echo "<td>".$r["name"]."</td>";
+	                    echo "<td>".$r["chamber"]."</td>";
+	                    echo "</tr>";
+	                } 
+	                echo "</table>";  
+	  
+	                }
+         
+                }
+            }
+            
+            <!-- When Bills is selected-->
+             else if($_POST['select'] == "Bills")
+            {
+                
+                
+                $bills = $_POST['select'];
+                $bills = strtolower($bills);
+                $billIdLabel = $_POST['textbox'];
+                $billIdLabel = trim($billIdLabel," ");
+                if($billIdLabel == null)
+                {
+                    echo "<script type='text/javascript'>alert('Please enter the keyword!')</script>";
+                }
+                else
+	            {
+	                     
+	                $billIdLabel = strtolower($billIdLabel);
+	                $chamber = $_POST['radio1'];
+	                $chamber = strtolower($chamber);
+	                
+	                $url = "http://congress.api.sunlightfoundation.com/".$bills."?bill_id=".$billIdLabel."&chamber=".$chamber."&apikey=ef7ff68lastActionLabel49billTitle67e93f8billId3a131bdfc9";
+	                
+	                
+	                
+	                $json = file_get_contents($url);
+	                $result = json_decode($json,true);
+	                //print_r($result);
+	                if(count($result["results"])==0)
+	                {
+	                     echo "<br/><h2 align='center'>The API returned zero results for the request.</h2>";
+	                }
+	                else
+	                {
+	                    
+	                
+	                echo "<br/><br/><br/><br/><br/><br/>";
+	                echo "<table align='center' border='1' width='720'>";
+	                echo "<tr>";
+	                echo "<th>Bill ID</th>";
+	                echo "<th>Short Title</th>";
+	                echo "<th>Chamber</th>";
+	                echo "<th>Details</th>";
+	                echo "</tr>";
+	    
+	    
+	                foreach($result["results"] as $r)
+	                {
+	                    
+	                    echo "<tr>";
+	                    echo "<td>".$r["bill_id"]."</td>";
+	                    echo "<td>".$r["short_title"]."</td>";
+	                    echo "<td>".$r["chamber"]."</td>";
+	                    echo '<td><a href="#" onclick="viewBillDetails(\''.$billIdLabel.'\',\''.$chamber.'\')">View Details</a></td>';
+	                    echo "</tr>";
+	                }
+	                echo "</table>"; 
+
+	                } 
+            	}
+            }
+            
+            <!-- When Amendments is selected-->
+            else if($_POST['select'] == "Amendments")
+            {
+                
+                
+                $amendments = $_POST['select'];
+                $amendments = strtolower($amendments);
+                $amendmentId = $_POST['textbox'];
+                $amendmentId = trim($amendmentId," ");
+
+                <!-- When AmendmentId is null, error occurs -->
+                if($amendmentId == null)
+                {
+                    echo "<script type='text/javascript'>alert('Please enter the keyword!')</script>";
+                }
+                else
+                {
+                                    
+	                $amendmentId = strtolower($amendmentId);
+	                $chamber = $_POST['radio1'];
+	                $chamber = strtolower($chamber);
+	                
+	                $url = "http://congress.api.sunlightfoundation.com/".$amendments."?amendment_id=".$amendmentId."&chamber=".$chamber."&apikey=ef7ff68lastActionLabel49billTitle67e93f8billId3a131bdfc9";
+	                
+	                
+	                
+	                $json = file_get_contents($url);
+	                $result = json_decode($json,true);
+	                if(count($result["results"])==0)
+	                {
+	                     echo "<br/><h2 align='center'>The API returned zero results for the request.</h2>";
+	                }
+	                else
+	                {
+	                    
+	                
+	                echo "<br/><br/><br/><br/><br/><br/>";
+	                echo "<table align='center' border='1' width='720'>";
+	                echo "<tr>";
+	                echo "<th>Amendment ID</th>";
+	                echo "<th>Amendment Type</th>";
+	                echo "<th>Chamber</th>";
+	                echo "<th>Introduced on</th>";
+	                echo "</tr>";
+	    
+	    
+	                foreach($result["results"] as $r)
+	                {
+	                    
+	                    echo "<tr>";
+	                    echo "<td>".$r["amendment_id"]."</td>";
+	                    echo "<td>".$r["amendment_type"]."</td>";
+	                    echo "<td>".$r["chamber"]."</td>";
+	                    echo "<td>".$r["introduced_on"]."</td>"; 
+	                    echo "</tr>";
+	                } 
+	                echo "</table>";  
+
+	                } 
+           		}
+            
+            }
+            
+        }
+}
+                    
+<!-- If Bioid is selected and search is clicked-->            
+if(isset($_POST["bioid"]) && !isset($_POST["search"])) 
+{
+
+<!-- To check if it is legislator or bill-->
+    if($_POST['legorbill'] == "legislators")
+    {
+        $legislators = $_POST["legislators"];
+        $bioid = $_POST["bioid"];
+        $chamber = $_POST["chamber"];
+        $state = $_POST["state"];
+    
+    $newurl = "http://congress.api.sunlightfoundation.com/".$legislators."?chamber=".$chamber."&state=".$state."&bioguide_id=".$bioid."&apikey=ef7ff68lastActionLabel49billTitle67e93f8billId3a131bdfc9";
+
+    <!-- Converting contents of url to json-->
+    $json = file_get_contents($newurl);
+    <!-- For decoding the json and read it as key value pairs-->
+    $result1 = json_decode($json,true);
+        
+    if(count($result1["results"])==0)
+    {
+        echo "<br/><h2 align='center'>The API returned zero results for the request.</h2>";
+    }
+    else
+    {
+        foreach($result1["results"] as $r)                                
+        {
+            $imageUrl = "https://theunitedstates.io/images/congress/225x275/".$r['bioguide_id'].".jpg";
+            $name = $r['title']." ".$r['first_name']." ".$r['last_name'];
+            $term = $r['term_end'];
+            $website = $r['website'];
+            $office = $r['office'];
+            $facebook_id = $r['facebook_id'];
+            $twitter_id = $r['twitter_id'];
+            $fname = $r['first_name'];
+            $lname = $r['last_name'];               
+        } 
+
+        $facebookUrl = "https://www.facebook.com/".$facebook_id;
+        $twitterUrl = "https://twitter.com/".$twitter_id;
+       
+        echo "<br/<br/><div align='center' style='margin: 0 auto; width:750px; height:470px; border:1px solid; '>";
+        echo "<span><img src='".$imageUrl."'></span>";
+        echo "<br/><span id='fullNameLabel'>Full Name</span>";
+        echo "<span id='fullName'>".$name."</span>";
+        echo "<br/><span id='termEndsLabel'>Term Ends On</span>";
+        echo "<span id='termEnds'>".$term."</span>";
+        echo "<br/><span id='websiteLabel'>Website</span>";
+       echo "<span id='website'><a href='".$website."'>".$website."</a></span>";
+        echo "<br/><span id='officeLabel'>Office</span>";
+        echo "<span id='office'>".$office."</span>";
+        echo "<br/><span id='facebookLabel'>Facebook</span>";
+        if($facebook_id == null)
+            echo "<span id='fbUrl'>NA</span>";
+        else
+            echo "<span id='fbUrl'><a href='".$facebookUrl."'>".$fname." ".$lname."</a></span>";
+        echo "<br/><span id='twitter'>Twitter</span>";
+        if($twitter_id == null)
+            echo "<span id='twitterUrl'>NA</span>";
+        else
+        echo "<span id='twitterUrl'><a href='".$twitterUrl."'>".$fname." ".$lname."</a></span>";
+        echo "</div>";
+        
+        }
+    }
+
+     
+}
+                    
+                    
+ <!-- When bill is selected and search is clicked -->                   
+if(isset($_POST["billIdLabel"]) && !isset($_POST["search"])) 
+{
+    
+    if($_POST['legorbill'] == "bills")
+    {
+	    $bills = $_POST["bills"];
+	    $billchamber = $_POST["billchamber"];
+	    $billIdLabel = $_POST["billIdLabel"];
+	    
+	    $url = "http://congress.api.sunlightfoundation.com/".$bills."?bill_id=".$billIdLabel."&chamber=".$billchamber."&apikey=ef7ff68lastActionLabel49billTitle67e93f8billId3a131bdfc9";
+	    $json = file_get_contents($url);
+	    $finalJson = json_decode($json,true);
+	   
+	    
+	    if(count($finalJson["results"])==0)
+	    {
+	        echo "<br/><h2 align='center'>The API returned zero results for the request.</h2>";
+	    }
+	    else
+	    {
+	        foreach($finalJson["results"] as $r)                                
+	        {
+	           
+	            $billIdLabel = $r['bill_id'];
+	            $title = $r['short_title'];
+	            $sponsor = $r['sponsor']['title']." ".$r['sponsor']['first_name']." ".$r['sponsor']['last_name'];
+	            $introducedon = $r['introduced_on'];
+	            $lastaction = $r['last_version']['version_name']." , ".$r['last_action_at'];
+	            $billurl = $r['last_version']['urls']['pdf'];
+	            
+	    
+	                    
+	        } 
+	       
+	        echo "<br/><br/><br/><br/><br/><div align='center' style='margin: 0 auto;'>";
+	        echo "<br/><span id='billIdLabel'>Bill ID</span>";
+	        echo "<span id='billId'>".$billIdLabel."</span>";
+	        echo "<br/><span id='billTitleLabel'>Bill Title</span>";
+	        echo "<span id='billTitle'>".$title."</span>";
+	        echo "<br/><span id='sponsorLabel'>Sponsor</span>";
+	        echo "<span id='sponsor'>".$sponsor."</span>";
+	        echo "<br/><span id='introducedOnLabel'>Introduced On</span>";
+	        echo "<span id='introducedOn'>".$introducedon."</span>";
+	        echo "<br/><span id='lastActionLabel'>Last Action with date</span>";
+	        echo "<span id='lastAction'>".$lastaction."</span>";
+	        echo "<br/><span id='billUrlLabel'>Bill URL</span>";
+	        if($title == null)
+	            echo "<span id='billUrl'><a href='".$billurl."'>".$billIdLabel."</a></span>";
+	        else
+	                echo "<span id='billUrl'><a href='".$billurl."'>".$title."</a></span>";
+	        echo "</div>";
+	    }
+
+        
+    }
+    
+     
+}
+
+?> 
+
+<!-- For browser when javascript is not supported, content inside no script is displayed -->
+<noscript>Sorry, your browser does not support JavaScript!</noscript>
+</body>
+</html>
